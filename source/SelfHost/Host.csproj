@@ -66,6 +66,12 @@
     <Reference Include="System.IdentityModel" />
     <Reference Include="System.identitymodel.services" />
     <Reference Include="System.Web" />
+    <Reference Include="Thinktecture.IdentityManager">
+      <HintPath>..\packages\Thinktecture.IdentityManager.1.0.0-alpha-1\lib\net45\Thinktecture.IdentityManager.dll</HintPath>
+    </Reference>
+    <Reference Include="Thinktecture.IdentityManager.MembershipReboot">
+      <HintPath>..\packages\Thinktecture.IdentityManager.MembershipReboot.1.0.0-alpha-1\lib\net45\Thinktecture.IdentityManager.MembershipReboot.dll</HintPath>
+    </Reference>
     <Reference Include="Thinktecture.IdentityServer, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Thinktecture.IdentityServer.v3.1.0.0-alpha-20140721\lib\net45\Thinktecture.IdentityServer.dll</HintPath>
@@ -76,8 +82,10 @@
     <Compile Include="Config\Clients.cs" />
     <Compile Include="Config\Factory.cs" />
     <Compile Include="Config\Scopes.cs" />
+    <Compile Include="MembershipRebootIdentityManagerFactory.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RelationalUserAccountQuery.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="MembershipRebootUserServiceFactory.cs" />
   </ItemGroup>

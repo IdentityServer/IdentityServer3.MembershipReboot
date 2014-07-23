@@ -6,8 +6,18 @@ namespace SelfHost
 {
     internal class Startup
     {
-        public void Configuration(IAppBuilder appBuilder)
+        public void Configuration(IAppBuilder app)
         {
+            app.Map("/admin", adminApp =>
+            {
+                var factory = new Thinktecture.IdentityManager.Host.MembershipRebootIdentityManagerFactory("MembershipReboot");
+                adminApp.UseIdentityManager(new Thinktecture.IdentityManager.IdentityManagerConfiguration()
+                {
+                    IdentityManagerFactory = factory.Create
+                });
+            });
+
+
             var options = new IdentityServerOptions
             {
                 IssuerUri = "https://idsrv3.com",
@@ -17,7 +27,7 @@ namespace SelfHost
                 Factory = Factory.Configure("MembershipReboot"),
             };
 
-            appBuilder.UseIdentityServer(options);
+            app.UseIdentityServer(options);
         }
     }
 }
