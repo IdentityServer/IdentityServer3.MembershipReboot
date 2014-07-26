@@ -44,7 +44,7 @@
   <ItemGroup>
     <Reference Include="BrockAllen.MembershipReboot, Version=7.3.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\BrockAllen.MembershipReboot.7.3.0\lib\net45\BrockAllen.MembershipReboot.dll</HintPath>
+      <HintPath>..\packages\BrockAllen.MembershipReboot.7.4.0\lib\net45\BrockAllen.MembershipReboot.dll</HintPath>
     </Reference>
     <Reference Include="Owin, Version=1.0.0.0, Culture=neutral, PublicKeyToken=f0ebd12fd5e55cc5, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -59,8 +59,9 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="Thinktecture.IdentityServer">
-      <HintPath>..\packages\Thinktecture.IdentityServer.v3.1.0.0-alpha-20140721\lib\net45\Thinktecture.IdentityServer.dll</HintPath>
+    <Reference Include="Thinktecture.IdentityServer, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Thinktecture.IdentityServer.v3.1.0.0-alpha-20140726\lib\net45\Thinktecture.IdentityServer.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
