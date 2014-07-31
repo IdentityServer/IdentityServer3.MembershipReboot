@@ -1,4 +1,4 @@
-# Thinktecture.IdentityServer.v3.MembershipReboot #
+# Thinktecture IdentityServer v3 MembershipReboot #
 
 ## Overview ##
 
