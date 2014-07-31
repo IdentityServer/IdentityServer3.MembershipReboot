@@ -25,6 +25,7 @@ namespace SelfHost
                 PublicHostName = "http://localhost:3333",
                 SigningCertificate = Certificate.Get(),
                 Factory = Factory.Configure("MembershipReboot"),
+                CorsPolicy = CorsPolicy.AllowAll
             };
 
             app.UseIdentityServer(options);

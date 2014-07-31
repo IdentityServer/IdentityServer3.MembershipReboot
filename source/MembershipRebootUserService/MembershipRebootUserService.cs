@@ -19,12 +19,12 @@ using ClaimHelper = BrockAllen.MembershipReboot.ClaimsExtensions;
 
 namespace Thinktecture.IdentityServer.MembershipReboot
 {
-    public class UserService<TAccount> : IUserService, IDisposable
+    public class MembershipRebootUserService<TAccount> : IUserService, IDisposable
         where TAccount : UserAccount
     {
         protected readonly UserAccountService<TAccount> userAccountService;
         IDisposable cleanup;
-        public UserService(UserAccountService<TAccount> userAccountService, IDisposable cleanup)
+        public MembershipRebootUserService(UserAccountService<TAccount> userAccountService, IDisposable cleanup)
         {
             if (userAccountService == null) throw new ArgumentNullException("userAccountService");
 
@@ -65,6 +65,7 @@ namespace Thinktecture.IdentityServer.MembershipReboot
                 new Claim(Constants.ClaimTypes.Subject, account.ID.ToString("D")),
                 new Claim(Constants.ClaimTypes.Name, GetDisplayNameForAccount(account.ID)),
                 new Claim(Constants.ClaimTypes.UpdatedAt, account.LastUpdated.ToEpochTime().ToString()),
+                new Claim(MembershipRebootConstants.ClaimTypes.Tenant, account.Tenant),
             };
 
             if (!String.IsNullOrWhiteSpace(account.Email))
@@ -80,7 +81,7 @@ namespace Thinktecture.IdentityServer.MembershipReboot
             }
 
             claims.AddRange(account.Claims.Select(x => new Claim(x.Type, x.Value)));
-            claims.AddRange(account.LinkedAccountClaims.Select(x => new Claim(x.Type, x.Value)));
+            //claims.AddRange(userAccountService.MapClaims(account));
 
             return claims;
         }
@@ -112,7 +113,7 @@ namespace Thinktecture.IdentityServer.MembershipReboot
                 //{
                 //    return new AuthenticateResult("/core/account/certificate", subject, name);
                 //}
-                //if (account.RequiresPasswordReset)
+                //if (account.RequiresPasswordReset || userAccountService.IsPasswordExpired(account))
                 //{
                 //    return new AuthenticateResult("/core/account/changepassword", subject, name);
                 //}
