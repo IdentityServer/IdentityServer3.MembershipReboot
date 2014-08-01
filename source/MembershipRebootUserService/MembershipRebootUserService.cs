@@ -53,7 +53,7 @@ namespace Thinktecture.IdentityServer.MembershipReboot
             var claims = GetClaimsFromAccount(acct);
             if (requestedClaimTypes != null)
             {
-                claims = claims.Where(x => requestedClaimTypes.Contains(x.Type));
+                claims = claims.Where(x => requestedClaimTypes.Contains(x.Type)).ToList();
             }
 
             return Task.FromResult<IEnumerable<Claim>>(claims);
@@ -80,7 +80,7 @@ namespace Thinktecture.IdentityServer.MembershipReboot
                 claims.Add(new Claim(Constants.ClaimTypes.PhoneNumberVerified, !String.IsNullOrWhiteSpace(account.MobilePhoneNumber) ? "true" : "false"));
             }
 
-            claims.AddRange(account.Claims.Select(x => new Claim(x.Type, x.Value)));
+            claims.AddRange(account.Claims.Select(x => new Claim(x.Type, x.Value)).Where(x => x.Type != Constants.ClaimTypes.Name));
             //claims.AddRange(userAccountService.MapClaims(account));
 
             return claims;
