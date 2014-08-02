@@ -63,7 +63,6 @@ namespace Thinktecture.IdentityServer.MembershipReboot
         {
             var claims = new List<Claim>{
                 new Claim(Constants.ClaimTypes.Subject, account.ID.ToString("D")),
-                new Claim(Constants.ClaimTypes.Name, GetDisplayNameForAccount(account.ID)),
                 new Claim(Constants.ClaimTypes.UpdatedAt, account.LastUpdated.ToEpochTime().ToString()),
                 new Claim(MembershipRebootConstants.ClaimTypes.Tenant, account.Tenant),
             };
@@ -80,7 +79,7 @@ namespace Thinktecture.IdentityServer.MembershipReboot
                 claims.Add(new Claim(Constants.ClaimTypes.PhoneNumberVerified, !String.IsNullOrWhiteSpace(account.MobilePhoneNumber) ? "true" : "false"));
             }
 
-            claims.AddRange(account.Claims.Select(x => new Claim(x.Type, x.Value)).Where(x => x.Type != Constants.ClaimTypes.Name));
+            claims.AddRange(account.Claims.Select(x => new Claim(x.Type, x.Value)));
             //claims.AddRange(userAccountService.MapClaims(account));
 
             return claims;
