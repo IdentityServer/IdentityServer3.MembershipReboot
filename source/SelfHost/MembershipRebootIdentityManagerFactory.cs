@@ -1,22 +1,23 @@
 ﻿using BrockAllen.MembershipReboot;
 using BrockAllen.MembershipReboot.Ef;
+using BrockAllen.MembershipReboot.Relational;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Web;
-using Thinktecture.IdentityManager.Core;
+using Thinktecture.IdentityManager;
 using Thinktecture.IdentityManager.MembershipReboot;
 
 namespace Thinktecture.IdentityManager.Host
 {
     public class MembershipRebootIdentityManagerFactory
     {
-        static MembershipRebootConfiguration config;
+        static MembershipRebootConfiguration<RelationalUserAccount> config;
         static MembershipRebootIdentityManagerFactory()
         {
             System.Data.Entity.Database.SetInitializer(new System.Data.Entity.MigrateDatabaseToLatestVersion<DefaultMembershipRebootDatabase, BrockAllen.MembershipReboot.Ef.Migrations.Configuration>());
 
-            config = new MembershipRebootConfiguration();
+            config = new MembershipRebootConfiguration<RelationalUserAccount>();
             config.PasswordHashingIterationCount = 10000;
             config.RequireAccountVerification = false;
         }
@@ -29,11 +30,16 @@ namespace Thinktecture.IdentityManager.Host
         
         public IIdentityManagerService Create()
         {
-            var repo = new DefaultUserAccountRepository(this.connString);
-            repo.QueryFilter = RelationalUserAccountQuery.Filter;
-            repo.QuerySort = RelationalUserAccountQuery.Sort;
-            var svc = new UserAccountService(config, repo);
-            return new IdentityManagerService<UserAccount>(svc, repo, repo);
+            var userrepo = new DefaultUserAccountRepository(this.connString);
+            userrepo.QueryFilter = RelationalUserAccountQuery.Filter;
+            userrepo.QuerySort = RelationalUserAccountQuery.Sort;
+            var usersvc = new UserAccountService<RelationalUserAccount>(config, userrepo);
+            
+            var grprepo = new DefaultGroupRepository(this.connString);
+            var grpsvc = new GroupService<RelationalGroup>(grprepo);
+            
+            var svc = new MembershipRebootIdentityManagerService<RelationalUserAccount, RelationalGroup>(usersvc, userrepo, grpsvc, grprepo);
+            return new DisposableIdentityManagerService(svc, userrepo);
         }
     }
 }

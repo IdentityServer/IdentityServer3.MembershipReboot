@@ -89,8 +89,8 @@ namespace Thinktecture.IdentityServer.MembershipReboot
         {
             var acct = userAccountService.GetByID(accountID);
 
-            var name = acct.GetClaimValue(Constants.ClaimTypes.Name);
-            if (name == null) name = acct.GetClaimValue(ClaimTypes.Name);
+            var name = acct.Claims.Where(x=>x.Type==Constants.ClaimTypes.Name).Select(x=>x.Value).FirstOrDefault();
+            if (name == null) name = acct.Claims.Where(x => x.Type == ClaimTypes.Name).Select(x => x.Value).FirstOrDefault();
             if (name == null) name = acct.Username;
 
             return name;
