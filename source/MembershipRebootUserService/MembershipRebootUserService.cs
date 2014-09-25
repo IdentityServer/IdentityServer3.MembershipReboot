@@ -136,7 +136,7 @@ namespace Thinktecture.IdentityServer.MembershipReboot
             return Task.FromResult<AuthenticateResult>(null);
         }
 
-        public virtual async Task<ExternalAuthenticateResult> AuthenticateExternalAsync(string subject, ExternalIdentity externalUser)
+        public virtual async Task<ExternalAuthenticateResult> AuthenticateExternalAsync(ExternalIdentity externalUser)
         {
             if (externalUser == null)
             {
