@@ -70,6 +70,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\default.licenseheader">
+      <Link>default.licenseheader</Link>
+    </None>
     <None Include="App.config" />
     <None Include="packages.config" />
     <None Include="Thinktecture.IdentityServer.v3.MembershipReboot.nuspec" />
