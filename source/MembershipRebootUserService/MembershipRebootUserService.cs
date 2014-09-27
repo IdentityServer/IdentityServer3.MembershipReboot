@@ -23,10 +23,12 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Thinktecture.IdentityModel.Extensions;
 using Thinktecture.IdentityServer.Core;
+using Thinktecture.IdentityServer.Core.Extensions;
 using Thinktecture.IdentityServer.Core.Authentication;
 using Thinktecture.IdentityServer.Core.Models;
 using Thinktecture.IdentityServer.Core.Services;
 using ClaimHelper = BrockAllen.MembershipReboot.ClaimsExtensions;
+using Thinktecture.IdentityServer.Core.Plumbing;
 
 namespace Thinktecture.IdentityServer.MembershipReboot
 {
@@ -52,10 +54,11 @@ namespace Thinktecture.IdentityServer.MembershipReboot
             }
         }
 
-        public virtual Task<IEnumerable<Claim>> GetProfileDataAsync(string subject,
+        public virtual Task<IEnumerable<Claim>> GetProfileDataAsync(
+            ClaimsPrincipal subject,
             IEnumerable<string> requestedClaimTypes = null)
         {
-            var acct = userAccountService.GetByID(subject.ToGuid());
+            var acct = userAccountService.GetByID(subject.GetSubjectId().ToGuid());
             if (acct == null)
             {
                 throw new ArgumentException("Invalid subject identifier");
@@ -107,7 +110,7 @@ namespace Thinktecture.IdentityServer.MembershipReboot
             return name;
         }
 
-        public virtual Task<AuthenticateResult> AuthenticateLocalAsync(string username, string password)
+        public virtual Task<AuthenticateResult> AuthenticateLocalAsync(string username, string password, SignInMessage message)
         {
             TAccount account;
             if (userAccountService.Authenticate(username, password, out account))
@@ -128,7 +131,8 @@ namespace Thinktecture.IdentityServer.MembershipReboot
                 //    return new AuthenticateResult("/core/account/changepassword", subject, name);
                 //}
 
-                return Task.FromResult(new AuthenticateResult(subject, name));
+                var p = IdentityServerPrincipal.Create(subject, name);
+                return Task.FromResult(new AuthenticateResult(p));
             }
 
             if (account != null)
@@ -147,7 +151,7 @@ namespace Thinktecture.IdentityServer.MembershipReboot
             return Task.FromResult<AuthenticateResult>(null);
         }
 
-        public virtual async Task<ExternalAuthenticateResult> AuthenticateExternalAsync(ExternalIdentity externalUser)
+        public virtual async Task<AuthenticateResult> AuthenticateExternalAsync(ExternalIdentity externalUser)
         {
             if (externalUser == null)
             {
@@ -168,11 +172,11 @@ namespace Thinktecture.IdentityServer.MembershipReboot
             }
             catch (ValidationException ex)
             {
-                return new ExternalAuthenticateResult(ex.Message);
+                return new AuthenticateResult(ex.Message);
             }
         }
 
-        protected virtual async Task<ExternalAuthenticateResult> ProcessNewExternalAccountAsync(string provider, string providerId, IEnumerable<Claim> claims)
+        protected virtual async Task<AuthenticateResult> ProcessNewExternalAccountAsync(string provider, string providerId, IEnumerable<Claim> claims)
         {
             var acct = userAccountService.CreateAccount(Guid.NewGuid().ToString("N"), null, null);
             userAccountService.AddOrUpdateLinkedAccount(acct, provider, providerId);
@@ -183,7 +187,7 @@ namespace Thinktecture.IdentityServer.MembershipReboot
             return await SignInFromExternalProviderAsync(acct.ID, provider);
         }
 
-        protected virtual async Task<ExternalAuthenticateResult> AccountCreatedFromExternalProviderAsync(Guid accountID, string provider, string providerId, IEnumerable<Claim> claims)
+        protected virtual async Task<AuthenticateResult> AccountCreatedFromExternalProviderAsync(Guid accountID, string provider, string providerId, IEnumerable<Claim> claims)
         {
             SetAccountEmail(accountID, ref claims);
             SetAccountPhone(accountID, ref claims);
@@ -191,18 +195,24 @@ namespace Thinktecture.IdentityServer.MembershipReboot
             return await UpdateAccountFromExternalClaimsAsync(accountID, provider, providerId, claims);
         }
 
-        protected virtual Task<ExternalAuthenticateResult> SignInFromExternalProviderAsync(Guid accountID, string provider)
+        protected virtual Task<AuthenticateResult> SignInFromExternalProviderAsync(Guid accountID, string provider)
         {
-            return Task.FromResult(new ExternalAuthenticateResult(provider, accountID.ToString("D"), GetDisplayNameForAccount(accountID)));
+            var p = IdentityServerPrincipal.Create(
+                accountID.ToString("D"),
+                GetDisplayNameForAccount(accountID),
+                IdentityServer.Core.Constants.AuthenticationMethods.External,
+                provider
+            );
+            return Task.FromResult(new AuthenticateResult(p));
         }
 
-        protected virtual Task<ExternalAuthenticateResult> UpdateAccountFromExternalClaimsAsync(Guid accountID, string provider, string providerId, IEnumerable<Claim> claims)
+        protected virtual Task<AuthenticateResult> UpdateAccountFromExternalClaimsAsync(Guid accountID, string provider, string providerId, IEnumerable<Claim> claims)
         {
             userAccountService.AddClaims(accountID, new UserClaimCollection(claims));
-            return Task.FromResult<ExternalAuthenticateResult>(null);
+            return Task.FromResult<AuthenticateResult>(null);
         }
 
-        protected virtual async Task<ExternalAuthenticateResult> ProcessExistingExternalAccountAsync(Guid accountID, string provider, string providerId, IEnumerable<Claim> claims)
+        protected virtual async Task<AuthenticateResult> ProcessExistingExternalAccountAsync(Guid accountID, string provider, string providerId, IEnumerable<Claim> claims)
         {
             return await SignInFromExternalProviderAsync(accountID, provider);
         }
@@ -271,9 +281,9 @@ namespace Thinktecture.IdentityServer.MembershipReboot
             }
         }
 
-        public Task<bool> IsActive(string subject)
+        public Task<bool> IsActive(ClaimsPrincipal subject)
         {
-            var acct = userAccountService.GetByID(subject.ToGuid());
+            var acct = userAccountService.GetByID(subject.GetSubjectId().ToGuid());
             if (acct == null)
             {
                 return Task.FromResult(false);
