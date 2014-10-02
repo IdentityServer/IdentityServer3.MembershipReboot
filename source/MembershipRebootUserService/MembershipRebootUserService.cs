@@ -281,7 +281,7 @@ namespace Thinktecture.IdentityServer.MembershipReboot
             }
         }
 
-        public Task<bool> IsActive(ClaimsPrincipal subject)
+        public Task<bool> IsActiveAsync(ClaimsPrincipal subject)
         {
             var acct = userAccountService.GetByID(subject.GetSubjectId().ToGuid());
             if (acct == null)
