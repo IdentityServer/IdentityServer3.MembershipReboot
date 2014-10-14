@@ -178,7 +178,7 @@ namespace Thinktecture.IdentityServer.MembershipReboot
 
         protected virtual async Task<AuthenticateResult> ProcessNewExternalAccountAsync(string provider, string providerId, IEnumerable<Claim> claims)
         {
-            var user = await CreateNewAccountFromExternalProvider(provider, providerId, claims);
+            var user = await CreateNewAccountFromExternalProviderAsync(provider, providerId, claims);
             user = userAccountService.CreateAccount(
                 userAccountService.Configuration.DefaultTenant,
                 Guid.NewGuid().ToString("N"), null, null,
@@ -192,7 +192,7 @@ namespace Thinktecture.IdentityServer.MembershipReboot
             return await SignInFromExternalProviderAsync(user.ID, provider);
         }
 
-        protected virtual Task<TAccount> CreateNewAccountFromExternalProvider(string provider, string providerId, IEnumerable<Claim> claims)
+        protected virtual Task<TAccount> CreateNewAccountFromExternalProviderAsync(string provider, string providerId, IEnumerable<Claim> claims)
         {
             // we'll let the default creation happen, but can override to initialize properties if needed
             return Task.FromResult<TAccount>(null);
