@@ -178,13 +178,21 @@ namespace Thinktecture.IdentityServer.MembershipReboot
 
         protected virtual async Task<AuthenticateResult> ProcessNewExternalAccountAsync(string provider, string providerId, IEnumerable<Claim> claims)
         {
-            var acct = userAccountService.CreateAccount(Guid.NewGuid().ToString("N"), null, null);
+            var acct = await CreateNewAccountFromExternalProvider(provider, providerId, claims);
+            if (acct == null) throw new InvalidOperationException("CreateNewAccountFromExternalProvider returned null");
+
             userAccountService.AddOrUpdateLinkedAccount(acct, provider, providerId);
 
             var result = await AccountCreatedFromExternalProviderAsync(acct.ID, provider, providerId, claims);
             if (result != null) return result;
 
             return await SignInFromExternalProviderAsync(acct.ID, provider);
+        }
+
+        protected virtual Task<TAccount> CreateNewAccountFromExternalProvider(string provider, string providerId, IEnumerable<Claim> claims)
+        {
+            var user = userAccountService.CreateAccount(Guid.NewGuid().ToString("N"), null, null);
+            return Task.FromResult(user);
         }
 
         protected virtual async Task<AuthenticateResult> AccountCreatedFromExternalProviderAsync(Guid accountID, string provider, string providerId, IEnumerable<Claim> claims)
