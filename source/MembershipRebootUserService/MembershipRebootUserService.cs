@@ -178,21 +178,24 @@ namespace Thinktecture.IdentityServer.MembershipReboot
 
         protected virtual async Task<AuthenticateResult> ProcessNewExternalAccountAsync(string provider, string providerId, IEnumerable<Claim> claims)
         {
-            var acct = await CreateNewAccountFromExternalProvider(provider, providerId, claims);
-            if (acct == null) throw new InvalidOperationException("CreateNewAccountFromExternalProvider returned null");
+            var user = await CreateNewAccountFromExternalProvider(provider, providerId, claims);
+            user = userAccountService.CreateAccount(
+                userAccountService.Configuration.DefaultTenant,
+                Guid.NewGuid().ToString("N"), null, null,
+                null, null, user);
+            
+            userAccountService.AddOrUpdateLinkedAccount(user, provider, providerId);
 
-            userAccountService.AddOrUpdateLinkedAccount(acct, provider, providerId);
-
-            var result = await AccountCreatedFromExternalProviderAsync(acct.ID, provider, providerId, claims);
+            var result = await AccountCreatedFromExternalProviderAsync(user.ID, provider, providerId, claims);
             if (result != null) return result;
 
-            return await SignInFromExternalProviderAsync(acct.ID, provider);
+            return await SignInFromExternalProviderAsync(user.ID, provider);
         }
 
         protected virtual Task<TAccount> CreateNewAccountFromExternalProvider(string provider, string providerId, IEnumerable<Claim> claims)
         {
-            var user = userAccountService.CreateAccount(Guid.NewGuid().ToString("N"), null, null);
-            return Task.FromResult(user);
+            // we'll let the default creation happen, but can override to initialize properties if needed
+            return Task.FromResult<TAccount>(null);
         }
 
         protected virtual async Task<AuthenticateResult> AccountCreatedFromExternalProviderAsync(Guid accountID, string provider, string providerId, IEnumerable<Claim> claims)
