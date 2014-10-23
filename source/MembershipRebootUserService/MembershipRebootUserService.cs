@@ -110,6 +110,11 @@ namespace Thinktecture.IdentityServer.MembershipReboot
             return name;
         }
 
+        public Task<AuthenticateResult> PreAuthenticateAsync(IDictionary<string, object> env, SignInMessage message)
+        {
+            return Task.FromResult<AuthenticateResult>(null);
+        }
+
         public virtual Task<AuthenticateResult> AuthenticateLocalAsync(string username, string password, SignInMessage message)
         {
             TAccount account;
@@ -160,14 +165,14 @@ namespace Thinktecture.IdentityServer.MembershipReboot
 
             try
             {
-                var acct = this.userAccountService.GetByLinkedAccount(externalUser.Provider.Name, externalUser.ProviderId);
+                var acct = this.userAccountService.GetByLinkedAccount(externalUser.Provider, externalUser.ProviderId);
                 if (acct == null)
                 {
-                    return await ProcessNewExternalAccountAsync(externalUser.Provider.Name, externalUser.ProviderId, externalUser.Claims);
+                    return await ProcessNewExternalAccountAsync(externalUser.Provider, externalUser.ProviderId, externalUser.Claims);
                 }
                 else
                 {
-                    return await ProcessExistingExternalAccountAsync(acct.ID, externalUser.Provider.Name, externalUser.ProviderId, externalUser.Claims);
+                    return await ProcessExistingExternalAccountAsync(acct.ID, externalUser.Provider, externalUser.ProviderId, externalUser.Claims);
                 }
             }
             catch (ValidationException ex)
