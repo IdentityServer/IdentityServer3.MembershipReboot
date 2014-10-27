@@ -24,11 +24,9 @@ using System.Threading.Tasks;
 using Thinktecture.IdentityModel.Extensions;
 using Thinktecture.IdentityServer.Core;
 using Thinktecture.IdentityServer.Core.Extensions;
-using Thinktecture.IdentityServer.Core.Authentication;
 using Thinktecture.IdentityServer.Core.Models;
 using Thinktecture.IdentityServer.Core.Services;
 using ClaimHelper = BrockAllen.MembershipReboot.ClaimsExtensions;
-using Thinktecture.IdentityServer.Core.Plumbing;
 
 namespace Thinktecture.IdentityServer.MembershipReboot
 {
