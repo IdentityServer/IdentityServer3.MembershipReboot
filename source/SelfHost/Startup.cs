@@ -40,7 +40,6 @@ namespace SelfHost
             {
                 IssuerUri = "https://idsrv3.com",
                 SiteName = "Thinktecture IdentityServer v3 - UserService-MembershipReboot",
-                RequireSsl = false,
                 
                 SigningCertificate = Certificate.Get(),
                 Factory = Factory.Configure("MembershipReboot"),
