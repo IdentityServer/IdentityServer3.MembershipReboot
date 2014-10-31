@@ -92,7 +92,7 @@ namespace Thinktecture.IdentityServer.MembershipReboot
             }
 
             claims.AddRange(account.Claims.Select(x => new Claim(x.Type, x.Value)));
-            //claims.AddRange(userAccountService.MapClaims(account));
+            claims.AddRange(userAccountService.MapClaims(account));
 
             return claims;
         }
