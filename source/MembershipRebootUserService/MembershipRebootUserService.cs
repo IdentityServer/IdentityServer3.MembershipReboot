@@ -35,7 +35,7 @@ namespace Thinktecture.IdentityServer.MembershipReboot
     {
         protected readonly UserAccountService<TAccount> userAccountService;
         IDisposable cleanup;
-        public MembershipRebootUserService(UserAccountService<TAccount> userAccountService, IDisposable cleanup)
+        public MembershipRebootUserService(UserAccountService<TAccount> userAccountService, IDisposable cleanup = null)
         {
             if (userAccountService == null) throw new ArgumentNullException("userAccountService");
 
