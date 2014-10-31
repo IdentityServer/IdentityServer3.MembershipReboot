@@ -113,45 +113,52 @@ namespace Thinktecture.IdentityServer.MembershipReboot
             return Task.FromResult<AuthenticateResult>(null);
         }
 
-        public virtual Task<AuthenticateResult> AuthenticateLocalAsync(string username, string password, SignInMessage message)
+        protected virtual Task<AuthenticateResult> PostAuthenticateLocalAsync(TAccount account, SignInMessage message)
+        {
+            //if (account.RequiresTwoFactorAuthCodeToSignIn())
+            //{
+            //    return new AuthenticateResult("/core/account/twofactor", subject, name);
+            //}
+            //if (account.RequiresTwoFactorCertificateToSignIn())
+            //{
+            //    return new AuthenticateResult("/core/account/certificate", subject, name);
+            //}
+            //if (account.RequiresPasswordReset || userAccountService.IsPasswordExpired(account))
+            //{
+            //    return new AuthenticateResult("/core/account/changepassword", subject, name);
+            //}
+            
+            return Task.FromResult<AuthenticateResult>(null);
+        }
+
+        public virtual async Task<AuthenticateResult> AuthenticateLocalAsync(string username, string password, SignInMessage message)
         {
             TAccount account;
             if (userAccountService.Authenticate(username, password, out account))
             {
+                var result = await PostAuthenticateLocalAsync(account, message);
+                if (result != null) return result;
+
                 var subject = account.ID.ToString("D");
                 var name = GetDisplayNameForAccount(account.ID);
-
-                //if (account.RequiresTwoFactorAuthCodeToSignIn())
-                //{
-                //    return new AuthenticateResult("/core/account/twofactor", subject, name);
-                //}
-                //if (account.RequiresTwoFactorCertificateToSignIn())
-                //{
-                //    return new AuthenticateResult("/core/account/certificate", subject, name);
-                //}
-                //if (account.RequiresPasswordReset || userAccountService.IsPasswordExpired(account))
-                //{
-                //    return new AuthenticateResult("/core/account/changepassword", subject, name);
-                //}
-
                 var p = IdentityServerPrincipal.Create(subject, name);
-                return Task.FromResult(new AuthenticateResult(p));
+                return new AuthenticateResult(p);
             }
 
             if (account != null)
             {
                 if (!account.IsLoginAllowed)
                 {
-                    return Task.FromResult(new AuthenticateResult("Account is not allowed to login"));
+                    return new AuthenticateResult("Account is not allowed to login");
                 }
 
                 if (account.IsAccountClosed)
                 {
-                    return Task.FromResult(new AuthenticateResult("Account is closed"));
+                    return new AuthenticateResult("Account is closed");
                 }
             }
 
-            return Task.FromResult<AuthenticateResult>(null);
+            return null;
         }
 
         public virtual async Task<AuthenticateResult> AuthenticateExternalAsync(ExternalIdentity externalUser)
