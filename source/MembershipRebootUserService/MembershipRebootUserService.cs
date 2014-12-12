@@ -24,11 +24,9 @@ using System.Threading.Tasks;
 using Thinktecture.IdentityModel.Extensions;
 using Thinktecture.IdentityServer.Core;
 using Thinktecture.IdentityServer.Core.Extensions;
-using Thinktecture.IdentityServer.Core.Authentication;
 using Thinktecture.IdentityServer.Core.Models;
 using Thinktecture.IdentityServer.Core.Services;
 using ClaimHelper = BrockAllen.MembershipReboot.ClaimsExtensions;
-using Thinktecture.IdentityServer.Core.Plumbing;
 
 namespace Thinktecture.IdentityServer.MembershipReboot
 {
@@ -37,7 +35,7 @@ namespace Thinktecture.IdentityServer.MembershipReboot
     {
         protected readonly UserAccountService<TAccount> userAccountService;
         IDisposable cleanup;
-        public MembershipRebootUserService(UserAccountService<TAccount> userAccountService, IDisposable cleanup)
+        public MembershipRebootUserService(UserAccountService<TAccount> userAccountService, IDisposable cleanup = null)
         {
             if (userAccountService == null) throw new ArgumentNullException("userAccountService");
 
@@ -94,7 +92,7 @@ namespace Thinktecture.IdentityServer.MembershipReboot
             }
 
             claims.AddRange(account.Claims.Select(x => new Claim(x.Type, x.Value)));
-            //claims.AddRange(userAccountService.MapClaims(account));
+            claims.AddRange(userAccountService.MapClaims(account));
 
             return claims;
         }
@@ -110,45 +108,57 @@ namespace Thinktecture.IdentityServer.MembershipReboot
             return name;
         }
 
-        public virtual Task<AuthenticateResult> AuthenticateLocalAsync(string username, string password, SignInMessage message)
+        public Task<AuthenticateResult> PreAuthenticateAsync(IDictionary<string, object> env, SignInMessage message)
+        {
+            return Task.FromResult<AuthenticateResult>(null);
+        }
+
+        protected virtual Task<AuthenticateResult> PostAuthenticateLocalAsync(TAccount account, SignInMessage message)
+        {
+            //if (account.RequiresTwoFactorAuthCodeToSignIn())
+            //{
+            //    return new AuthenticateResult("/core/account/twofactor", subject, name);
+            //}
+            //if (account.RequiresTwoFactorCertificateToSignIn())
+            //{
+            //    return new AuthenticateResult("/core/account/certificate", subject, name);
+            //}
+            //if (account.RequiresPasswordReset || userAccountService.IsPasswordExpired(account))
+            //{
+            //    return new AuthenticateResult("/core/account/changepassword", subject, name);
+            //}
+            
+            return Task.FromResult<AuthenticateResult>(null);
+        }
+
+        public virtual async Task<AuthenticateResult> AuthenticateLocalAsync(string username, string password, SignInMessage message)
         {
             TAccount account;
             if (userAccountService.Authenticate(username, password, out account))
             {
+                var result = await PostAuthenticateLocalAsync(account, message);
+                if (result != null) return result;
+
                 var subject = account.ID.ToString("D");
                 var name = GetDisplayNameForAccount(account.ID);
-
-                //if (account.RequiresTwoFactorAuthCodeToSignIn())
-                //{
-                //    return new AuthenticateResult("/core/account/twofactor", subject, name);
-                //}
-                //if (account.RequiresTwoFactorCertificateToSignIn())
-                //{
-                //    return new AuthenticateResult("/core/account/certificate", subject, name);
-                //}
-                //if (account.RequiresPasswordReset || userAccountService.IsPasswordExpired(account))
-                //{
-                //    return new AuthenticateResult("/core/account/changepassword", subject, name);
-                //}
-
                 var p = IdentityServerPrincipal.Create(subject, name);
-                return Task.FromResult(new AuthenticateResult(p));
+                return new AuthenticateResult(p);
             }
 
             if (account != null)
             {
                 if (!account.IsLoginAllowed)
                 {
-                    return Task.FromResult(new AuthenticateResult("Account is not allowed to login"));
+                    return new AuthenticateResult("Account is not allowed to login");
                 }
 
                 if (account.IsAccountClosed)
                 {
-                    return Task.FromResult(new AuthenticateResult("Account is closed"));
+                    return new AuthenticateResult("Account is closed");
                 }
             }
 
-            return Task.FromResult<AuthenticateResult>(null);
+            return null;
         }
 
         public virtual async Task<AuthenticateResult> AuthenticateExternalAsync(ExternalIdentity externalUser)
@@ -160,14 +170,14 @@ namespace Thinktecture.IdentityServer.MembershipReboot
 
             try
             {
-                var acct = this.userAccountService.GetByLinkedAccount(externalUser.Provider.Name, externalUser.ProviderId);
+                var acct = this.userAccountService.GetByLinkedAccount(externalUser.Provider, externalUser.ProviderId);
                 if (acct == null)
                 {
-                    return await ProcessNewExternalAccountAsync(externalUser.Provider.Name, externalUser.ProviderId, externalUser.Claims);
+                    return await ProcessNewExternalAccountAsync(externalUser.Provider, externalUser.ProviderId, externalUser.Claims);
                 }
                 else
                 {
-                    return await ProcessExistingExternalAccountAsync(acct.ID, externalUser.Provider.Name, externalUser.ProviderId, externalUser.Claims);
+                    return await ProcessExistingExternalAccountAsync(acct.ID, externalUser.Provider, externalUser.ProviderId, externalUser.Claims);
                 }
             }
             catch (ValidationException ex)
@@ -178,13 +188,24 @@ namespace Thinktecture.IdentityServer.MembershipReboot
 
         protected virtual async Task<AuthenticateResult> ProcessNewExternalAccountAsync(string provider, string providerId, IEnumerable<Claim> claims)
         {
-            var acct = userAccountService.CreateAccount(Guid.NewGuid().ToString("N"), null, null);
-            userAccountService.AddOrUpdateLinkedAccount(acct, provider, providerId);
+            var user = await CreateNewAccountFromExternalProviderAsync(provider, providerId, claims);
+            user = userAccountService.CreateAccount(
+                userAccountService.Configuration.DefaultTenant,
+                Guid.NewGuid().ToString("N"), null, null,
+                null, null, user);
+            
+            userAccountService.AddOrUpdateLinkedAccount(user, provider, providerId);
 
-            var result = await AccountCreatedFromExternalProviderAsync(acct.ID, provider, providerId, claims);
+            var result = await AccountCreatedFromExternalProviderAsync(user.ID, provider, providerId, claims);
             if (result != null) return result;
 
-            return await SignInFromExternalProviderAsync(acct.ID, provider);
+            return await SignInFromExternalProviderAsync(user.ID, provider);
+        }
+
+        protected virtual Task<TAccount> CreateNewAccountFromExternalProviderAsync(string provider, string providerId, IEnumerable<Claim> claims)
+        {
+            // we'll let the default creation happen, but can override to initialize properties if needed
+            return Task.FromResult<TAccount>(null);
         }
 
         protected virtual async Task<AuthenticateResult> AccountCreatedFromExternalProviderAsync(Guid accountID, string provider, string providerId, IEnumerable<Claim> claims)
