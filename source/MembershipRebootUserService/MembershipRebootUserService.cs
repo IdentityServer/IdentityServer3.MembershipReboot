@@ -141,8 +141,8 @@ namespace Thinktecture.IdentityServer.MembershipReboot
 
                 var subject = account.ID.ToString("D");
                 var name = GetDisplayNameForAccount(account.ID);
-                var p = IdentityServerPrincipal.Create(subject, name);
-                return new AuthenticateResult(p);
+                
+                return new AuthenticateResult(subject, name);
             }
 
             if (account != null)
@@ -218,13 +218,11 @@ namespace Thinktecture.IdentityServer.MembershipReboot
 
         protected virtual Task<AuthenticateResult> SignInFromExternalProviderAsync(Guid accountID, string provider)
         {
-            var p = IdentityServerPrincipal.Create(
-                accountID.ToString("D"),
-                GetDisplayNameForAccount(accountID),
-                IdentityServer.Core.Constants.AuthenticationMethods.External,
-                provider
-            );
-            return Task.FromResult(new AuthenticateResult(p));
+            return Task.FromResult(new AuthenticateResult(
+                subject: accountID.ToString("D"),
+                name: GetDisplayNameForAccount(accountID),
+                identityProvider: provider,
+                authenticationMethod: IdentityServer.Core.Constants.AuthenticationMethods.External));
         }
 
         protected virtual Task<AuthenticateResult> UpdateAccountFromExternalClaimsAsync(Guid accountID, string provider, string providerId, IEnumerable<Claim> claims)
@@ -311,6 +309,17 @@ namespace Thinktecture.IdentityServer.MembershipReboot
             }
 
             return Task.FromResult(!acct.IsAccountClosed && acct.IsLoginAllowed);
+        }
+
+
+        public Task<AuthenticateResult> PreAuthenticateAsync(SignInMessage message)
+        {
+            return Task.FromResult<AuthenticateResult>(null);
+        }
+
+        public Task SignOutAsync(ClaimsPrincipal subject)
+        {
+            return Task.FromResult<object>(null);
         }
     }
 }
