@@ -108,7 +108,7 @@ namespace Thinktecture.IdentityServer.MembershipReboot
             return name;
         }
 
-        public Task<AuthenticateResult> PreAuthenticateAsync(IDictionary<string, object> env, SignInMessage message)
+        public virtual Task<AuthenticateResult> PreAuthenticateAsync(IDictionary<string, object> env, SignInMessage message)
         {
             return Task.FromResult<AuthenticateResult>(null);
         }
@@ -300,7 +300,7 @@ namespace Thinktecture.IdentityServer.MembershipReboot
             }
         }
 
-        public Task<bool> IsActiveAsync(ClaimsPrincipal subject)
+        public virtual Task<bool> IsActiveAsync(ClaimsPrincipal subject)
         {
             var acct = userAccountService.GetByID(subject.GetSubjectId().ToGuid());
             if (acct == null)
@@ -312,12 +312,12 @@ namespace Thinktecture.IdentityServer.MembershipReboot
         }
 
 
-        public Task<AuthenticateResult> PreAuthenticateAsync(SignInMessage message)
+        public virtual Task<AuthenticateResult> PreAuthenticateAsync(SignInMessage message)
         {
             return Task.FromResult<AuthenticateResult>(null);
         }
 
-        public Task SignOutAsync(ClaimsPrincipal subject)
+        public virtual Task SignOutAsync(ClaimsPrincipal subject)
         {
             return Task.FromResult<object>(null);
         }
