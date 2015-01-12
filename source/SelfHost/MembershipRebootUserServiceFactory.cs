@@ -16,6 +16,7 @@
 
 using BrockAllen.MembershipReboot;
 using BrockAllen.MembershipReboot.Ef;
+using System.Security.Claims;
 using Thinktecture.IdentityServer.Core.Services;
 using Thinktecture.IdentityServer.MembershipReboot;
 
@@ -41,6 +42,17 @@ namespace SelfHost
             config.PasswordHashingIterationCount = 50000;
             config.AllowLoginAfterAccountCreation = true;
             config.RequireAccountVerification = false;
+            config.AddCommandHandler(new ClaimsMap());
+        }
+    }
+
+    public class ClaimsMap : ICommandHandler<MapClaimsFromAccount<UserAccount>>
+    {
+        public void Handle(MapClaimsFromAccount<UserAccount> cmd)
+        {
+            cmd.MappedClaims = new Claim[]{
+                new Claim("role", "map_was_called")
+            };
         }
     }
 }

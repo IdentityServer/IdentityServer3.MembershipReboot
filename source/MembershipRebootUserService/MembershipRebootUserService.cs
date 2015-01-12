@@ -76,7 +76,8 @@ namespace Thinktecture.IdentityServer.MembershipReboot
             var claims = new List<Claim>{
                 new Claim(Constants.ClaimTypes.Subject, account.ID.ToString("D")),
                 new Claim(Constants.ClaimTypes.UpdatedAt, account.LastUpdated.ToEpochTime().ToString()),
-                new Claim(MembershipRebootConstants.ClaimTypes.Tenant, account.Tenant),
+                new Claim("tenant", account.Tenant),
+                new Claim(Constants.ClaimTypes.PreferredUserName, account.Username),
             };
 
             if (!String.IsNullOrWhiteSpace(account.Email))
