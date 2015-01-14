@@ -22,19 +22,15 @@ using System.Threading.Tasks;
 using Thinktecture.IdentityServer.Core.Configuration;
 using Thinktecture.IdentityServer.Core.Services;
 using Thinktecture.IdentityServer.Core.Services.InMemory;
-using Thinktecture.IdentityServer.Host.Config;
 
-namespace SelfHost.Config
+namespace SelfHost.IdSvr
 {
     class Factory
     {
-        public static IdentityServerServiceFactory Configure(string connString)
+        public static IdentityServerServiceFactory Configure()
         {
             var factory = new IdentityServerServiceFactory();
 
-            factory.UserService = 
-                new Registration<IUserService>(resolver => MembershipRebootUserServiceFactory.Factory(connString));
-            
             var scopeStore = new InMemoryScopeStore(Scopes.Get());
             factory.ScopeStore = new Registration<IScopeStore>(resolver => scopeStore);
             

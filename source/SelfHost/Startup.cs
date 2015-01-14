@@ -17,8 +17,10 @@ using Microsoft.Owin.Security.Twitter;
  * limitations under the License.
  */
 using Owin;
-using SelfHost.Config;
+using SelfHost.IdSvr;
+using Thinktecture.IdentityManager.Configuration;
 using Thinktecture.IdentityServer.Core.Configuration;
+using SelfHost.IdMgr;
 
 namespace SelfHost
 {
@@ -26,15 +28,22 @@ namespace SelfHost
     {
         public void Configuration(IAppBuilder app)
         {
+            var connectionString = "MembershipReboot";
+
             app.Map("/admin", adminApp =>
             {
-                var factory = new Thinktecture.IdentityManager.Host.MembershipRebootIdentityManagerFactory("MembershipReboot");
-                adminApp.UseIdentityManager(new Thinktecture.IdentityManager.IdentityManagerConfiguration()
+                var factory = new IdentityManagerServiceFactory();
+                factory.Configure(connectionString);
+
+                adminApp.UseIdentityManager(new IdentityManagerOptions()
                 {
-                    IdentityManagerFactory = factory.Create
+                    Factory = factory
                 });
             });
 
+
+            var idSvrFactory = Factory.Configure();
+            idSvrFactory.ConfigureCustomUserService(connectionString);
 
             var options = new IdentityServerOptions
             {
@@ -42,7 +51,7 @@ namespace SelfHost
                 SiteName = "Thinktecture IdentityServer v3 - UserService-MembershipReboot",
                 
                 SigningCertificate = Certificate.Get(),
-                Factory = Factory.Configure("MembershipReboot"),
+                Factory = idSvrFactory,
                 CorsPolicy = CorsPolicy.AllowAll,
                 AuthenticationOptions = new AuthenticationOptions{
                     IdentityProviders = ConfigureAdditionalIdentityProviders,
