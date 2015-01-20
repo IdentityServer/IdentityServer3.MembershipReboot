@@ -33,6 +33,8 @@ namespace Thinktecture.IdentityServer.MembershipReboot
     public class MembershipRebootUserService<TAccount> : IUserService
         where TAccount : UserAccount
     {
+        public string DisplayNameClaimType { get; set; }
+        
         protected readonly UserAccountService<TAccount> userAccountService;
 
         public MembershipRebootUserService(UserAccountService<TAccount> userAccountService)
@@ -91,8 +93,14 @@ namespace Thinktecture.IdentityServer.MembershipReboot
         protected virtual string GetDisplayNameForAccount(Guid accountID)
         {
             var acct = userAccountService.GetByID(accountID);
+            var claims = GetClaimsFromAccount(acct);
 
-            var name = acct.Claims.Where(x=>x.Type==Constants.ClaimTypes.Name).Select(x=>x.Value).FirstOrDefault();
+            string name = null;
+            if (DisplayNameClaimType != null)
+            {
+                name = acct.Claims.Where(x => x.Type == DisplayNameClaimType).Select(x => x.Value).FirstOrDefault();
+            }
+            if (name == null) name = acct.Claims.Where(x => x.Type == Constants.ClaimTypes.Name).Select(x => x.Value).FirstOrDefault();
             if (name == null) name = acct.Claims.Where(x => x.Type == ClaimTypes.Name).Select(x => x.Value).FirstOrDefault();
             if (name == null) name = acct.Username;
 
