@@ -55,7 +55,7 @@ namespace Thinktecture.IdentityServer.MembershipReboot
             }
 
             var claims = GetClaimsFromAccount(acct);
-            if (requestedClaimTypes != null)
+            if (requestedClaimTypes != null && requestedClaimTypes.Any())
             {
                 claims = claims.Where(x => requestedClaimTypes.Contains(x.Type));
             }
