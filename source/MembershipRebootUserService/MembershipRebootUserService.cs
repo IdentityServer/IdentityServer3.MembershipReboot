@@ -119,7 +119,14 @@ namespace Thinktecture.IdentityServer.MembershipReboot
         
         protected virtual bool ValidateLocalCredentials(string username, string password, SignInMessage message, out TAccount account)
         {
-            return userAccountService.Authenticate(username, password, out account);
+            if (String.IsNullOrWhiteSpace(message.Tenant))
+            {
+                return userAccountService.Authenticate(username, password, out account);
+            }
+            else
+            {
+                return userAccountService.Authenticate(message.Tenant, username, password, out account);
+            }
         }
 
         public virtual async Task<AuthenticateResult> AuthenticateLocalAsync(string username, string password, SignInMessage message)
