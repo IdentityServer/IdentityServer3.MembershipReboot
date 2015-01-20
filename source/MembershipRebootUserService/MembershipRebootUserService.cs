@@ -116,11 +116,16 @@ namespace Thinktecture.IdentityServer.MembershipReboot
         {
             return Task.FromResult<AuthenticateResult>(null);
         }
+        
+        protected virtual bool ValidateLocalCredentials(string username, string password, SignInMessage message, out TAccount account)
+        {
+            return userAccountService.Authenticate(username, password, out account);
+        }
 
         public virtual async Task<AuthenticateResult> AuthenticateLocalAsync(string username, string password, SignInMessage message)
         {
             TAccount account;
-            if (userAccountService.Authenticate(username, password, out account))
+            if (ValidateLocalCredentials(username, password, message, out account))
             {
                 var result = await PostAuthenticateLocalAsync(account, message);
                 if (result != null) return result;
