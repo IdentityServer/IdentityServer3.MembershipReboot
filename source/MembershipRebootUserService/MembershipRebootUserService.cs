@@ -119,14 +119,8 @@ namespace Thinktecture.IdentityServer.MembershipReboot
         
         protected virtual bool ValidateLocalCredentials(string username, string password, SignInMessage message, out TAccount account)
         {
-            if (String.IsNullOrWhiteSpace(message.Tenant))
-            {
-                return userAccountService.Authenticate(username, password, out account);
-            }
-            else
-            {
-                return userAccountService.Authenticate(message.Tenant, username, password, out account);
-            }
+            var tenant = String.IsNullOrWhiteSpace(message.Tenant) ? userAccountService.Configuration.DefaultTenant : message.Tenant;
+            return userAccountService.Authenticate(tenant, username, password, out account);
         }
 
         public virtual async Task<AuthenticateResult> AuthenticateLocalAsync(string username, string password, SignInMessage message)
@@ -174,10 +168,11 @@ namespace Thinktecture.IdentityServer.MembershipReboot
 
             try
             {
-                var acct = this.userAccountService.GetByLinkedAccount(externalUser.Provider, externalUser.ProviderId);
+                var tenant = String.IsNullOrWhiteSpace(message.Tenant) ? userAccountService.Configuration.DefaultTenant : message.Tenant;
+                var acct = this.userAccountService.GetByLinkedAccount(tenant, externalUser.Provider, externalUser.ProviderId);
                 if (acct == null)
                 {
-                    return await ProcessNewExternalAccountAsync(externalUser.Provider, externalUser.ProviderId, externalUser.Claims);
+                    return await ProcessNewExternalAccountAsync(tenant, externalUser.Provider, externalUser.ProviderId, externalUser.Claims);
                 }
                 else
                 {
@@ -190,13 +185,15 @@ namespace Thinktecture.IdentityServer.MembershipReboot
             }
         }
 
-        protected virtual async Task<AuthenticateResult> ProcessNewExternalAccountAsync(string provider, string providerId, IEnumerable<Claim> claims)
+        protected virtual async Task<AuthenticateResult> ProcessNewExternalAccountAsync(string tenant, string provider, string providerId, IEnumerable<Claim> claims)
         {
             var user = await InstantiateNewAccountFromExternalProviderAsync(provider, providerId, claims);
             user = userAccountService.CreateAccount(
-                userAccountService.Configuration.DefaultTenant,
-                Guid.NewGuid().ToString("N"), null, null,
-                null, null, user);
+                tenant,
+                Guid.NewGuid().ToString("N"), 
+                null, null,
+                null, null, 
+                user);
             
             userAccountService.AddOrUpdateLinkedAccount(user, provider, providerId);
 
