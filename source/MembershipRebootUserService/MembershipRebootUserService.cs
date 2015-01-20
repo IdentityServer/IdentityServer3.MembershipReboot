@@ -155,7 +155,7 @@ namespace Thinktecture.IdentityServer.MembershipReboot
 
         protected virtual Task<IEnumerable<Claim>> GetClaimsForAuthenticateResult(TAccount account)
         {
-            return null;
+            return Task.FromResult((IEnumerable<Claim>)null);
         }
 
         public virtual async Task<AuthenticateResult> AuthenticateExternalAsync(ExternalIdentity externalUser, SignInMessage message)
