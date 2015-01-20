@@ -114,19 +114,6 @@ namespace Thinktecture.IdentityServer.MembershipReboot
 
         protected virtual Task<AuthenticateResult> PostAuthenticateLocalAsync(TAccount account, SignInMessage message)
         {
-            //if (account.RequiresTwoFactorAuthCodeToSignIn())
-            //{
-            //    return new AuthenticateResult("/core/account/twofactor", subject, name);
-            //}
-            //if (account.RequiresTwoFactorCertificateToSignIn())
-            //{
-            //    return new AuthenticateResult("/core/account/certificate", subject, name);
-            //}
-            //if (account.RequiresPasswordReset || userAccountService.IsPasswordExpired(account))
-            //{
-            //    return new AuthenticateResult("/core/account/changepassword", subject, name);
-            //}
-            
             return Task.FromResult<AuthenticateResult>(null);
         }
 
@@ -140,8 +127,9 @@ namespace Thinktecture.IdentityServer.MembershipReboot
 
                 var subject = account.ID.ToString("D");
                 var name = GetDisplayNameForAccount(account.ID);
-                
-                return new AuthenticateResult(subject, name);
+
+                var claims = await GetClaimsForAuthenticateResult(account);
+                return new AuthenticateResult(subject, name, claims);
             }
 
             if (account != null)
@@ -157,6 +145,11 @@ namespace Thinktecture.IdentityServer.MembershipReboot
                 }
             }
 
+            return null;
+        }
+
+        protected virtual Task<IEnumerable<Claim>> GetClaimsForAuthenticateResult(TAccount account)
+        {
             return null;
         }
 
@@ -215,13 +208,17 @@ namespace Thinktecture.IdentityServer.MembershipReboot
             return await UpdateAccountFromExternalClaimsAsync(accountID, provider, providerId, claims);
         }
 
-        protected virtual Task<AuthenticateResult> SignInFromExternalProviderAsync(Guid accountID, string provider)
+        protected virtual async Task<AuthenticateResult> SignInFromExternalProviderAsync(Guid accountID, string provider)
         {
-            return Task.FromResult(new AuthenticateResult(
+            var account = userAccountService.GetByID(accountID);
+            var claims = await GetClaimsForAuthenticateResult(account);
+            
+            return new AuthenticateResult(
                 subject: accountID.ToString("D"),
                 name: GetDisplayNameForAccount(accountID),
+                claims:claims,
                 identityProvider: provider,
-                authenticationMethod: IdentityServer.Core.Constants.AuthenticationMethods.External));
+                authenticationMethod: IdentityServer.Core.Constants.AuthenticationMethods.External);
         }
 
         protected virtual Task<AuthenticateResult> UpdateAccountFromExternalClaimsAsync(Guid accountID, string provider, string providerId, IEnumerable<Claim> claims)
