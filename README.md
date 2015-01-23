@@ -1,4 +1,4 @@
-# MembershipReboot support for Thinktecture IdentityServer v3 #
+# MembershipReboot support for Thinktecture IdentityServer3 #
 
 Dev build: [![Build status](https://ci.appveyor.com/api/projects/status/m7b5v6d7l4q0kl3u?svg=true)](https://ci.appveyor.com/project/leastprivilege/thinktecture-identityserver-v3-membershipreboot)
 [![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/thinktecture/Thinktecture.IdentityServer.v3?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
