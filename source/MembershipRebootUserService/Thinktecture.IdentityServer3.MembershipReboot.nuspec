@@ -9,6 +9,7 @@
     <projectUrl>https://github.com/IdentityServer/Thinktecture.IdentityServer3.MembershipReboot</projectUrl>
     <iconUrl>http://www.thinktecture.com/images/favicon.ico</iconUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <licenseUrl>https://github.com/IdentityServer/Thinktecture.IdentityServer3.MembershipReboot/blob/master/LICENSE</licenseUrl>
     <summary>MembershipReboot support for IdentityServer3</summary>
     <description>MembershipReboot support for IdentityServer3</description>
     <releaseNotes></releaseNotes>
