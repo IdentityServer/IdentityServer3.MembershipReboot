@@ -125,33 +125,40 @@ namespace Thinktecture.IdentityServer.MembershipReboot
 
         public virtual async Task<AuthenticateResult> AuthenticateLocalAsync(string username, string password, SignInMessage message)
         {
-            TAccount account;
-            if (ValidateLocalCredentials(username, password, message, out account))
+            try
             {
-                var result = await PostAuthenticateLocalAsync(account, message);
-                if (result != null) return result;
-
-                var subject = account.ID.ToString("D");
-                var name = GetDisplayNameForAccount(account.ID);
-
-                var claims = await GetClaimsForAuthenticateResult(account);
-                return new AuthenticateResult(subject, name, claims);
-            }
-
-            if (account != null)
-            {
-                if (!account.IsLoginAllowed)
+                TAccount account;
+                if (ValidateLocalCredentials(username, password, message, out account))
                 {
-                    return new AuthenticateResult("Account is not allowed to login");
+                    var result = await PostAuthenticateLocalAsync(account, message);
+                    if (result != null) return result;
+
+                    var subject = account.ID.ToString("D");
+                    var name = GetDisplayNameForAccount(account.ID);
+
+                    var claims = await GetClaimsForAuthenticateResult(account);
+                    return new AuthenticateResult(subject, name, claims);
                 }
 
-                if (account.IsAccountClosed)
+                if (account != null)
                 {
-                    return new AuthenticateResult("Account is closed");
-                }
-            }
+                    if (!account.IsLoginAllowed)
+                    {
+                        return new AuthenticateResult("Account is not allowed to login");
+                    }
 
-            return null;
+                    if (account.IsAccountClosed)
+                    {
+                        return new AuthenticateResult("Account is closed");
+                    }
+                }
+
+                return null;
+            }
+            catch(ValidationException ex)
+            {
+                return new AuthenticateResult(ex.Message);
+            }
         }
 
         protected virtual Task<IEnumerable<Claim>> GetClaimsForAuthenticateResult(TAccount account)
