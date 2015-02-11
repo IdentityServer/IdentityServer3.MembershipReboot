@@ -66,7 +66,7 @@ namespace Thinktecture.IdentityServer.MembershipReboot
         protected virtual IEnumerable<Claim> GetClaimsFromAccount(TAccount account)
         {
             var claims = new List<Claim>{
-                new Claim(Constants.ClaimTypes.Subject, account.ID.ToString("D")),
+                new Claim(Constants.ClaimTypes.Subject, GetSubjectForAccount(account)),
                 new Claim(Constants.ClaimTypes.UpdatedAt, account.LastUpdated.ToEpochTime().ToString(), ClaimValueTypes.Integer),
                 new Claim("tenant", account.Tenant),
                 new Claim(Constants.ClaimTypes.PreferredUserName, account.Username),
@@ -90,6 +90,11 @@ namespace Thinktecture.IdentityServer.MembershipReboot
             return claims;
         }
 
+        protected virtual string GetSubjectForAccount(TAccount account)
+        {
+            return account.ID.ToString("D");
+        }
+
         protected virtual string GetDisplayNameForAccount(Guid accountID)
         {
             var acct = userAccountService.GetByID(accountID);
@@ -107,22 +112,16 @@ namespace Thinktecture.IdentityServer.MembershipReboot
             return name;
         }
 
-        public virtual Task<AuthenticateResult> PreAuthenticateAsync(IDictionary<string, object> env, SignInMessage message)
+        protected virtual Task<IEnumerable<Claim>> GetClaimsForAuthenticateResultAsync(TAccount account)
         {
-            return Task.FromResult<AuthenticateResult>(null);
+            return Task.FromResult((IEnumerable<Claim>)null);
         }
-
-        protected virtual Task<AuthenticateResult> PostAuthenticateLocalAsync(TAccount account, SignInMessage message)
+        
+        public virtual Task<AuthenticateResult> PreAuthenticateAsync(SignInMessage message)
         {
             return Task.FromResult<AuthenticateResult>(null);
         }
         
-        protected virtual bool ValidateLocalCredentials(string username, string password, SignInMessage message, out TAccount account)
-        {
-            var tenant = String.IsNullOrWhiteSpace(message.Tenant) ? userAccountService.Configuration.DefaultTenant : message.Tenant;
-            return userAccountService.Authenticate(tenant, username, password, out account);
-        }
-
         public virtual async Task<AuthenticateResult> AuthenticateLocalAsync(string username, string password, SignInMessage message)
         {
             try
@@ -133,10 +132,10 @@ namespace Thinktecture.IdentityServer.MembershipReboot
                     var result = await PostAuthenticateLocalAsync(account, message);
                     if (result != null) return result;
 
-                    var subject = account.ID.ToString("D");
+                    var subject = GetSubjectForAccount(account);
                     var name = GetDisplayNameForAccount(account.ID);
 
-                    var claims = await GetClaimsForAuthenticateResult(account);
+                    var claims = await GetClaimsForAuthenticateResultAsync(account);
                     return new AuthenticateResult(subject, name, claims);
                 }
 
@@ -161,9 +160,15 @@ namespace Thinktecture.IdentityServer.MembershipReboot
             }
         }
 
-        protected virtual Task<IEnumerable<Claim>> GetClaimsForAuthenticateResult(TAccount account)
+        protected virtual Task<AuthenticateResult> PostAuthenticateLocalAsync(TAccount account, SignInMessage message)
         {
-            return Task.FromResult((IEnumerable<Claim>)null);
+            return Task.FromResult<AuthenticateResult>(null);
+        }
+
+        protected virtual bool ValidateLocalCredentials(string username, string password, SignInMessage message, out TAccount account)
+        {
+            var tenant = String.IsNullOrWhiteSpace(message.Tenant) ? userAccountService.Configuration.DefaultTenant : message.Tenant;
+            return userAccountService.Authenticate(tenant, username, password, out account);
         }
 
         public virtual async Task<AuthenticateResult> AuthenticateExternalAsync(ExternalIdentity externalUser, SignInMessage message)
@@ -227,7 +232,7 @@ namespace Thinktecture.IdentityServer.MembershipReboot
         protected virtual async Task<AuthenticateResult> SignInFromExternalProviderAsync(Guid accountID, string provider)
         {
             var account = userAccountService.GetByID(accountID);
-            var claims = await GetClaimsForAuthenticateResult(account);
+            var claims = await GetClaimsForAuthenticateResultAsync(account);
             
             return new AuthenticateResult(
                 subject: accountID.ToString("D"),
@@ -321,11 +326,6 @@ namespace Thinktecture.IdentityServer.MembershipReboot
             }
 
             return Task.FromResult(!acct.IsAccountClosed && acct.IsLoginAllowed);
-        }
-
-        public virtual Task<AuthenticateResult> PreAuthenticateAsync(SignInMessage message)
-        {
-            return Task.FromResult<AuthenticateResult>(null);
         }
 
         public virtual Task SignOutAsync(ClaimsPrincipal subject)
