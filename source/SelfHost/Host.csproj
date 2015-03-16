@@ -53,8 +53,9 @@
     <Reference Include="IdentityManager">
       <HintPath>..\packages\IdentityManager.1.0.0-pre-10032\lib\net45\IdentityManager.dll</HintPath>
     </Reference>
-    <Reference Include="IdentityManager.MembershipReboot">
-      <HintPath>..\packages\IdentityManager.MembershipReboot.1.0.0-beta4\lib\net45\IdentityManager.MembershipReboot.dll</HintPath>
+    <Reference Include="IdentityManager.MembershipReboot, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\IdentityManager.MembershipReboot.1.0.0-beta4-1\lib\net45\IdentityManager.MembershipReboot.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Owin, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
