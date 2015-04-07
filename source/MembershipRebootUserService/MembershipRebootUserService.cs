@@ -22,13 +22,13 @@ using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Thinktecture.IdentityModel.Extensions;
-using Thinktecture.IdentityServer.Core;
-using Thinktecture.IdentityServer.Core.Extensions;
-using Thinktecture.IdentityServer.Core.Models;
-using Thinktecture.IdentityServer.Core.Services;
+using IdentityServer3.Core;
+using IdentityServer3.Core.Extensions;
+using IdentityServer3.Core.Models;
+using IdentityServer3.Core.Services;
 using ClaimHelper = BrockAllen.MembershipReboot.ClaimsExtensions;
 
-namespace Thinktecture.IdentityServer.MembershipReboot
+namespace IdentityServer3.MembershipReboot
 {
     public class MembershipRebootUserService<TAccount> : IUserService
         where TAccount : UserAccount
@@ -239,7 +239,7 @@ namespace Thinktecture.IdentityServer.MembershipReboot
                 name: GetDisplayNameForAccount(accountID),
                 claims:claims,
                 identityProvider: provider,
-                authenticationMethod: IdentityServer.Core.Constants.AuthenticationMethods.External);
+                authenticationMethod: IdentityServer3.Core.Constants.AuthenticationMethods.External);
         }
 
         protected virtual Task<AuthenticateResult> UpdateAccountFromExternalClaimsAsync(Guid accountID, string provider, string providerId, IEnumerable<Claim> claims)

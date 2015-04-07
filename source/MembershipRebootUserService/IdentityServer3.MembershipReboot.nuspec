@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>IdentityServer3.MembershipReboot</id>
+    <version>0.0.0</version>
+    <title>IdentityServer3 - MembershipReboot</title>
+    <authors>Brock Allen, Dominick Baier</authors>
+    <owners>Brock Allen, Dominick Baier</owners>
+    <projectUrl>https://github.com/IdentityServer/IdentityServer3.MembershipReboot</projectUrl>
+    <iconUrl>https://identityserver.github.io/Documentation/assets/images/icons/IDserver_icon128.jpg</iconUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <licenseUrl>https://github.com/IdentityServer/IdentityServer3.MembershipReboot/blob/master/LICENSE</licenseUrl>
+    <summary>MembershipReboot support for IdentityServer3</summary>
+    <description>MembershipReboot support for IdentityServer3</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright 2015</copyright>
+    <tags>IdentityServer OpenID Connect OpenIDConnect OAuth2 OWIN ASP.NET Katana WebApi SSO Federation Claims Identity MembershipReboot</tags>
+  </metadata>
+</package>

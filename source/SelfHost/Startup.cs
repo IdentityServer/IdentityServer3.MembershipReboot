@@ -19,7 +19,7 @@ using Microsoft.Owin.Security.Twitter;
 using Owin;
 using SelfHost.IdSvr;
 using IdentityManager.Configuration;
-using Thinktecture.IdentityServer.Core.Configuration;
+using IdentityServer3.Core.Configuration;
 using SelfHost.IdMgr;
 
 namespace SelfHost
@@ -47,12 +47,10 @@ namespace SelfHost
 
             var options = new IdentityServerOptions
             {
-                IssuerUri = "https://idsrv3.com",
-                SiteName = "Thinktecture IdentityServer3 - UserService-MembershipReboot",
+                SiteName = "IdentityServer3 - UserService-MembershipReboot",
                 
                 SigningCertificate = Certificate.Get(),
                 Factory = idSvrFactory,
-                CorsPolicy = CorsPolicy.AllowAll,
                 AuthenticationOptions = new AuthenticationOptions{
                     IdentityProviders = ConfigureAdditionalIdentityProviders,
                 }

@@ -15,7 +15,7 @@
  */
 using Microsoft.Owin.Hosting;
 using System;
-using Thinktecture.IdentityServer.Core.Logging;
+using IdentityServer3.Core.Logging;
 
 namespace SelfHost
 {

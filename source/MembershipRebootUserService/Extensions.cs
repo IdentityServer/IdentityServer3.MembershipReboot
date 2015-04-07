@@ -16,7 +16,7 @@
 
 using System;
 
-namespace Thinktecture.IdentityServer.MembershipReboot
+namespace IdentityServer3.MembershipReboot
 {
     static class Extensions
     {
