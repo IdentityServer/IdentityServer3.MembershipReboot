@@ -68,8 +68,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MembershipRebootUserService.cs" />
-    <Compile Include="Extensions.cs" />
+    <Compile Include="IdentityServer3.MembershipReboot.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

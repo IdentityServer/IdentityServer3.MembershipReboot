@@ -129,7 +129,7 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\MembershipRebootUserService\MembershipRebootUserService.csproj">
+    <ProjectReference Include="..\IdentityServer3.MembershipReboot\IdentityServer3.MembershipReboot.csproj">
       <Project>{9eb9f5c7-49e1-440b-923f-bb842d9436d2}</Project>
       <Name>MembershipRebootUserService</Name>
     </ProjectReference>

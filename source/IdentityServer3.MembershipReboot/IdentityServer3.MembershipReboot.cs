@@ -27,8 +27,9 @@ using IdentityServer3.Core.Extensions;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
 using ClaimHelper = BrockAllen.MembershipReboot.ClaimsExtensions;
+using IdSvr3 = IdentityServer3.Core;
 
-namespace IdentityServer3.MembershipReboot
+namespace YourRootNamespace.IdentityServer3.MembershipReboot
 {
     public class MembershipRebootUserService<TAccount> : IUserService
         where TAccount : UserAccount
@@ -239,7 +240,7 @@ namespace IdentityServer3.MembershipReboot
                 name: GetDisplayNameForAccount(accountID),
                 claims:claims,
                 identityProvider: provider,
-                authenticationMethod: IdentityServer3.Core.Constants.AuthenticationMethods.External);
+                authenticationMethod: IdSvr3.Constants.AuthenticationMethods.External);
         }
 
         protected virtual Task<AuthenticateResult> UpdateAccountFromExternalClaimsAsync(Guid accountID, string provider, string providerId, IEnumerable<Claim> claims)
@@ -331,6 +332,21 @@ namespace IdentityServer3.MembershipReboot
         public virtual Task SignOutAsync(ClaimsPrincipal subject)
         {
             return Task.FromResult<object>(null);
+        }
+    }
+    
+    static class Extensions
+    {
+        public static Guid ToGuid(this string s)
+        {
+            Guid g;
+            if (!String.IsNullOrWhiteSpace(s) &&
+                Guid.TryParse(s, out g))
+            {
+                return g;
+            }
+
+            return Guid.Empty;
         }
     }
 }
