@@ -21,7 +21,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using Thinktecture.IdentityModel.Extensions;
+using IdentityModel.Extensions;
 using IdentityServer3.Core;
 using IdentityServer3.Core.Extensions;
 using IdentityServer3.Core.Models;
