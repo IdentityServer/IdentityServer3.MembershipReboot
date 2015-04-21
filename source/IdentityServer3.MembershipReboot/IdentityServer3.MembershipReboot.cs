@@ -340,8 +340,7 @@ namespace YourRootNamespace.IdentityServer3.MembershipReboot
         public static Guid ToGuid(this string s)
         {
             Guid g;
-            if (!String.IsNullOrWhiteSpace(s) &&
-                Guid.TryParse(s, out g))
+            if (Guid.TryParse(s, out g))
             {
                 return g;
             }
