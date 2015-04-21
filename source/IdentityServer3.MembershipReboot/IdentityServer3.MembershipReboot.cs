@@ -35,7 +35,7 @@ namespace YourRootNamespace.IdentityServer3.MembershipReboot
         where TAccount : UserAccount
     {
         public string DisplayNameClaimType { get; set; }
-
+        
         protected readonly UserAccountService<TAccount> userAccountService;
 
         public MembershipRebootUserService(UserAccountService<TAccount> userAccountService)
