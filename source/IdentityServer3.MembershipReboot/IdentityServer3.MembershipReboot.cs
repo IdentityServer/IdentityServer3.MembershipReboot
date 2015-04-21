@@ -35,7 +35,7 @@ namespace YourRootNamespace.IdentityServer3.MembershipReboot
         where TAccount : UserAccount
     {
         public string DisplayNameClaimType { get; set; }
-        
+
         protected readonly UserAccountService<TAccount> userAccountService;
 
         public MembershipRebootUserService(UserAccountService<TAccount> userAccountService)
@@ -106,11 +106,10 @@ namespace YourRootNamespace.IdentityServer3.MembershipReboot
             {
                 name = acct.Claims.Where(x => x.Type == DisplayNameClaimType).Select(x => x.Value).FirstOrDefault();
             }
-            if (name == null) name = acct.Claims.Where(x => x.Type == Constants.ClaimTypes.Name).Select(x => x.Value).FirstOrDefault();
-            if (name == null) name = acct.Claims.Where(x => x.Type == ClaimTypes.Name).Select(x => x.Value).FirstOrDefault();
-            if (name == null) name = acct.Username;
-
-            return name;
+            return name
+                ?? acct.Claims.Where(x => x.Type == Constants.ClaimTypes.Name).Select(x => x.Value).FirstOrDefault()
+                ?? acct.Claims.Where(x => x.Type == ClaimTypes.Name).Select(x => x.Value).FirstOrDefault()
+                ?? acct.Username;
         }
 
         protected virtual Task<IEnumerable<Claim>> GetClaimsForAuthenticateResultAsync(TAccount account)
