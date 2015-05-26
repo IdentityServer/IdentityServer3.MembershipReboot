@@ -201,10 +201,13 @@ namespace YourRootNamespace.IdentityServer3.MembershipReboot
         protected virtual async Task<AuthenticateResult> ProcessNewExternalAccountAsync(string tenant, string provider, string providerId, IEnumerable<Claim> claims)
         {
             var user = await InstantiateNewAccountFromExternalProviderAsync(provider, providerId, claims);
+
+            var email = ClaimHelper.GetValue(claims, Constants.ClaimTypes.Email);
+
             user = userAccountService.CreateAccount(
                 tenant,
-                Guid.NewGuid().ToString("N"), 
-                null, null,
+                Guid.NewGuid().ToString("N"),
+                null, email,
                 null, null, 
                 user);
             
