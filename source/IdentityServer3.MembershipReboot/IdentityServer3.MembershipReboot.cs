@@ -199,23 +199,32 @@ namespace YourRootNamespace.IdentityServer3.MembershipReboot
 
         protected virtual async Task<AuthenticateResult> ProcessNewExternalAccountAsync(string tenant, string provider, string providerId, IEnumerable<Claim> claims)
         {
-            var user = await InstantiateNewAccountFromExternalProviderAsync(provider, providerId, claims);
+            var user = await TryGetExistingUserFromExternalProviderClaimsAsync(provider, claims);
+            if (user == null)
+            {
+                user = await InstantiateNewAccountFromExternalProviderAsync(provider, providerId, claims);
 
-            var email = ClaimHelper.GetValue(claims, Constants.ClaimTypes.Email);
+                var email = ClaimHelper.GetValue(claims, Constants.ClaimTypes.Email);
 
-            user = userAccountService.CreateAccount(
-                tenant,
-                Guid.NewGuid().ToString("N"),
-                null, email,
-                null, null, 
-                user);
-            
+                user = userAccountService.CreateAccount(
+                    tenant,
+                    Guid.NewGuid().ToString("N"),
+                    null, email,
+                    null, null,
+                    user);
+            }
+
             userAccountService.AddOrUpdateLinkedAccount(user, provider, providerId);
 
             var result = await AccountCreatedFromExternalProviderAsync(user.ID, provider, providerId, claims);
             if (result != null) return result;
 
             return await SignInFromExternalProviderAsync(user.ID, provider);
+        }
+
+        protected virtual Task<TAccount> TryGetExistingUserFromExternalProviderClaimsAsync(string provider, IEnumerable<Claim> claims)
+        {
+            return Task.FromResult<TAccount>(null);
         }
 
         protected virtual Task<TAccount> InstantiateNewAccountFromExternalProviderAsync(string provider, string providerId, IEnumerable<Claim> claims)
