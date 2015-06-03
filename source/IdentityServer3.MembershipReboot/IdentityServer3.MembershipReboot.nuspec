@@ -16,9 +16,9 @@
     <copyright>Copyright 2015</copyright>
     <tags>IdentityServer OpenID Connect OpenIDConnect OAuth2 OWIN ASP.NET Katana WebApi SSO Federation Claims Identity MembershipReboot</tags>
     <dependencies>
-      <dependency id="IdentityServer3" version="2.0.0-build00019"  />
-      <dependency id="BrockAllen.MembershipReboot" version="8.2.1" />
-      <dependency id="Thinktecture.IdentityModel.Core" version="1.4.0" />
+      <dependency id="IdentityServer3" version="2.0.0-build00094"  />
+      <dependency id="BrockAllen.MembershipReboot" version="8.2.0" />
+      <dependency id="IdentityModel" version="1.0.0-build00006" />
     </dependencies>
   </metadata>
   <files>
