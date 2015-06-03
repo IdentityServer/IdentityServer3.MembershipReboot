@@ -58,8 +58,9 @@
       <HintPath>..\packages\IdentityManager.MembershipReboot.1.0.0-beta4-2\lib\net45\IdentityManager.MembershipReboot.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="IdentityServer3">
-      <HintPath>..\packages\IdentityServer3.2.0.0-build00019\lib\net45\IdentityServer3.dll</HintPath>
+    <Reference Include="IdentityServer3, Version=2.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\IdentityServer3.2.0.0-build00094\lib\net45\IdentityServer3.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Microsoft.Owin, Version=3.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

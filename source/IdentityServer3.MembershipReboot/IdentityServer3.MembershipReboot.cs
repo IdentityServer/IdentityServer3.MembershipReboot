@@ -45,10 +45,11 @@ namespace YourRootNamespace.IdentityServer3.MembershipReboot
             this.userAccountService = userAccountService;
         }
 
-        public virtual Task<IEnumerable<Claim>> GetProfileDataAsync(
-            ClaimsPrincipal subject,
-            IEnumerable<string> requestedClaimTypes = null)
+        public virtual Task<IEnumerable<Claim>> GetProfileDataAsync(ProfileDataRequestContext ctx)
         {
+            var subject = ctx.Subject;
+            var requestedClaimTypes = ctx.RequestedClaimTypes;
+
             var acct = userAccountService.GetByID(subject.GetSubjectId().ToGuid());
             if (acct == null)
             {
@@ -117,13 +118,17 @@ namespace YourRootNamespace.IdentityServer3.MembershipReboot
             return Task.FromResult((IEnumerable<Claim>)null);
         }
         
-        public virtual Task<AuthenticateResult> PreAuthenticateAsync(SignInMessage message)
+        public virtual Task<AuthenticateResult> PreAuthenticateAsync(PreAuthenticationContext ctx)
         {
             return Task.FromResult<AuthenticateResult>(null);
         }
         
-        public virtual async Task<AuthenticateResult> AuthenticateLocalAsync(string username, string password, SignInMessage message)
+        public virtual async Task<AuthenticateResult> AuthenticateLocalAsync(LocalAuthenticationContext ctx)
         {
+            var username = ctx.UserName;
+            var password = ctx.Password;
+            var message = ctx.SignInMessage;
+
             try
             {
                 TAccount account;
@@ -171,8 +176,11 @@ namespace YourRootNamespace.IdentityServer3.MembershipReboot
             return userAccountService.Authenticate(tenant, username, password, out account);
         }
 
-        public virtual async Task<AuthenticateResult> AuthenticateExternalAsync(ExternalIdentity externalUser, SignInMessage message)
+        public virtual async Task<AuthenticateResult> AuthenticateExternalAsync(ExternalAuthenticationContext ctx)
         {
+            var externalUser = ctx.ExternalIdentity;
+            var message = ctx.SignInMessage;
+
             if (externalUser == null)
             {
                 throw new ArgumentNullException("externalUser");
@@ -329,8 +337,10 @@ namespace YourRootNamespace.IdentityServer3.MembershipReboot
             }
         }
 
-        public virtual Task<bool> IsActiveAsync(ClaimsPrincipal subject)
+        public virtual Task<bool> IsActiveAsync(IsActiveContext ctx)
         {
+            var subject = ctx.Subject;
+
             var acct = userAccountService.GetByID(subject.GetSubjectId().ToGuid());
             if (acct == null)
             {
@@ -340,7 +350,7 @@ namespace YourRootNamespace.IdentityServer3.MembershipReboot
             return Task.FromResult(!acct.IsAccountClosed && acct.IsLoginAllowed);
         }
 
-        public virtual Task SignOutAsync(ClaimsPrincipal subject)
+        public virtual Task SignOutAsync(SignOutContext ctx)
         {
             return Task.FromResult<object>(null);
         }
