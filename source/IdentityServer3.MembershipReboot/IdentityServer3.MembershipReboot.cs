@@ -26,11 +26,12 @@ using IdentityServer3.Core;
 using IdentityServer3.Core.Extensions;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
+using IdentityServer3.Core.Services.Default;
 //using BrockAllen.MembershipReboot.ClaimsExtensions;
 
 namespace IdentityServer3.MembershipReboot
 {
-    public class MembershipRebootUserService<TAccount> : IUserService
+    public class MembershipRebootUserService<TAccount> : UserServiceBase
         where TAccount : UserAccount
     {
         public string DisplayNameClaimType { get; set; }
@@ -44,7 +45,7 @@ namespace IdentityServer3.MembershipReboot
             this.userAccountService = userAccountService;
         }
 
-        public virtual Task<IEnumerable<Claim>> GetProfileDataAsync(ProfileDataRequestContext ctx)
+        public override Task<IEnumerable<Claim>> GetProfileDataAsync(ProfileDataRequestContext ctx)
         {
             var subject = ctx.Subject;
             var requestedClaimTypes = ctx.RequestedClaimTypes;
@@ -117,12 +118,7 @@ namespace IdentityServer3.MembershipReboot
             return Task.FromResult((IEnumerable<Claim>)null);
         }
         
-        public virtual Task<AuthenticateResult> PreAuthenticateAsync(PreAuthenticationContext ctx)
-        {
-            return Task.FromResult<AuthenticateResult>(null);
-        }
-        
-        public virtual async Task<AuthenticateResult> AuthenticateLocalAsync(LocalAuthenticationContext ctx)
+        public override async Task<AuthenticateResult> AuthenticateLocalAsync(LocalAuthenticationContext ctx)
         {
             var username = ctx.UserName;
             var password = ctx.Password;
@@ -175,7 +171,7 @@ namespace IdentityServer3.MembershipReboot
             return userAccountService.Authenticate(tenant, username, password, out account);
         }
 
-        public virtual async Task<AuthenticateResult> AuthenticateExternalAsync(ExternalAuthenticationContext ctx)
+        public override async Task<AuthenticateResult> AuthenticateExternalAsync(ExternalAuthenticationContext ctx)
         {
             var externalUser = ctx.ExternalIdentity;
             var message = ctx.SignInMessage;
@@ -336,7 +332,7 @@ namespace IdentityServer3.MembershipReboot
             }
         }
 
-        public virtual Task<bool> IsActiveAsync(IsActiveContext ctx)
+        public override Task<bool> IsActiveAsync(IsActiveContext ctx)
         {
             var subject = ctx.Subject;
 
@@ -347,11 +343,6 @@ namespace IdentityServer3.MembershipReboot
             }
 
             return Task.FromResult(!acct.IsAccountClosed && acct.IsLoginAllowed);
-        }
-
-        public virtual Task SignOutAsync(SignOutContext ctx)
-        {
-            return Task.FromResult<object>(null);
         }
     }
     
