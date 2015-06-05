@@ -26,10 +26,9 @@ using IdentityServer3.Core;
 using IdentityServer3.Core.Extensions;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
-using ClaimHelper = BrockAllen.MembershipReboot.ClaimsExtensions;
-using IdSvr3 = IdentityServer3.Core;
+//using BrockAllen.MembershipReboot.ClaimsExtensions;
 
-namespace YourRootNamespace.IdentityServer3.MembershipReboot
+namespace IdentityServer3.MembershipReboot
 {
     public class MembershipRebootUserService<TAccount> : IUserService
         where TAccount : UserAccount
@@ -212,7 +211,7 @@ namespace YourRootNamespace.IdentityServer3.MembershipReboot
             {
                 user = await InstantiateNewAccountFromExternalProviderAsync(provider, providerId, claims);
 
-                var email = ClaimHelper.GetValue(claims, Constants.ClaimTypes.Email);
+                var email = claims.GetValue(Constants.ClaimTypes.Email);
 
                 user = userAccountService.CreateAccount(
                     tenant,
@@ -259,7 +258,7 @@ namespace YourRootNamespace.IdentityServer3.MembershipReboot
                 name: GetDisplayNameForAccount(accountID),
                 claims:claims,
                 identityProvider: provider,
-                authenticationMethod: IdSvr3.Constants.AuthenticationMethods.External);
+                authenticationMethod: Constants.AuthenticationMethods.External);
         }
 
         protected virtual Task<AuthenticateResult> UpdateAccountFromExternalClaimsAsync(Guid accountID, string provider, string providerId, IEnumerable<Claim> claims)
@@ -275,7 +274,7 @@ namespace YourRootNamespace.IdentityServer3.MembershipReboot
 
         protected virtual void SetAccountEmail(Guid accountID, ref IEnumerable<Claim> claims)
         {
-            var email = ClaimHelper.GetValue(claims, Constants.ClaimTypes.Email);
+            var email = claims.GetValue(Constants.ClaimTypes.Email);
             if (email != null)
             {
                 var acct = userAccountService.GetByID(accountID);
@@ -283,7 +282,7 @@ namespace YourRootNamespace.IdentityServer3.MembershipReboot
                 {
                     try
                     {
-                        var email_verified = ClaimHelper.GetValue(claims, Constants.ClaimTypes.EmailVerified);
+                        var email_verified = claims.GetValue(Constants.ClaimTypes.EmailVerified);
                         if (email_verified != null && email_verified == "true")
                         {
                             userAccountService.SetConfirmedEmail(acct.ID, email);
@@ -307,7 +306,7 @@ namespace YourRootNamespace.IdentityServer3.MembershipReboot
 
         protected virtual void SetAccountPhone(Guid accountID, ref IEnumerable<Claim> claims)
         {
-            var phone = ClaimHelper.GetValue(claims, Constants.ClaimTypes.PhoneNumber);
+            var phone = claims.GetValue(Constants.ClaimTypes.PhoneNumber);
             if (phone != null)
             {
                 var acct = userAccountService.GetByID(accountID);
@@ -315,7 +314,7 @@ namespace YourRootNamespace.IdentityServer3.MembershipReboot
                 {
                     try
                     {
-                        var phone_verified = ClaimHelper.GetValue(claims, Constants.ClaimTypes.PhoneNumberVerified);
+                        var phone_verified = claims.GetValue(Constants.ClaimTypes.PhoneNumberVerified);
                         if (phone_verified != null && phone_verified == "true")
                         {
                             userAccountService.SetConfirmedMobilePhone(acct.ID, phone);
