@@ -27,7 +27,6 @@ using IdentityServer3.Core.Extensions;
 using IdentityServer3.Core.Models;
 using IdentityServer3.Core.Services;
 using IdentityServer3.Core.Services.Default;
-//using BrockAllen.MembershipReboot.ClaimsExtensions;
 
 namespace IdentityServer3.MembershipReboot
 {
@@ -45,7 +44,7 @@ namespace IdentityServer3.MembershipReboot
             this.userAccountService = userAccountService;
         }
 
-        public override Task<IEnumerable<Claim>> GetProfileDataAsync(ProfileDataRequestContext ctx)
+        public override Task GetProfileDataAsync(ProfileDataRequestContext ctx)
         {
             var subject = ctx.Subject;
             var requestedClaimTypes = ctx.RequestedClaimTypes;
@@ -62,7 +61,9 @@ namespace IdentityServer3.MembershipReboot
                 claims = claims.Where(x => requestedClaimTypes.Contains(x.Type));
             }
 
-            return Task.FromResult<IEnumerable<Claim>>(claims);
+            ctx.IssuedClaims = claims;
+
+            return Task.FromResult(0);
         }
 
         protected virtual IEnumerable<Claim> GetClaimsFromAccount(TAccount account)
@@ -118,46 +119,50 @@ namespace IdentityServer3.MembershipReboot
             return Task.FromResult((IEnumerable<Claim>)null);
         }
         
-        public override async Task<AuthenticateResult> AuthenticateLocalAsync(LocalAuthenticationContext ctx)
+        public override async Task AuthenticateLocalAsync(LocalAuthenticationContext ctx)
         {
             var username = ctx.UserName;
             var password = ctx.Password;
             var message = ctx.SignInMessage;
+
+            AuthenticateResult result = null;
 
             try
             {
                 TAccount account;
                 if (ValidateLocalCredentials(username, password, message, out account))
                 {
-                    var result = await PostAuthenticateLocalAsync(account, message);
-                    if (result != null) return result;
+                    result = await PostAuthenticateLocalAsync(account, message);
+                    if (result == null)
+                    {
+                        var subject = GetSubjectForAccount(account);
+                        var name = GetDisplayNameForAccount(account.ID);
 
-                    var subject = GetSubjectForAccount(account);
-                    var name = GetDisplayNameForAccount(account.ID);
-
-                    var claims = await GetClaimsForAuthenticateResultAsync(account);
-                    return new AuthenticateResult(subject, name, claims);
+                        var claims = await GetClaimsForAuthenticateResultAsync(account);
+                        result = new AuthenticateResult(subject, name, claims);
+                    }
                 }
-
-                if (account != null)
+                else
                 {
-                    if (!account.IsLoginAllowed)
+                    if (account != null)
                     {
-                        return new AuthenticateResult("Account is not allowed to login");
-                    }
-
-                    if (account.IsAccountClosed)
-                    {
-                        return new AuthenticateResult("Account is closed");
+                        if (!account.IsLoginAllowed)
+                        {
+                            result = new AuthenticateResult("Account is not allowed to login");
+                        }
+                        else if (account.IsAccountClosed)
+                        {
+                            result = new AuthenticateResult("Account is closed");
+                        }
                     }
                 }
-
-                return null;
             }
             catch(ValidationException ex)
             {
-                return new AuthenticateResult(ex.Message);
+                result = new AuthenticateResult(ex.Message);
             }
+
+            ctx.AuthenticateResult = result;
         }
 
         protected virtual Task<AuthenticateResult> PostAuthenticateLocalAsync(TAccount account, SignInMessage message)
@@ -171,7 +176,7 @@ namespace IdentityServer3.MembershipReboot
             return userAccountService.Authenticate(tenant, username, password, out account);
         }
 
-        public override async Task<AuthenticateResult> AuthenticateExternalAsync(ExternalAuthenticationContext ctx)
+        public override async Task AuthenticateExternalAsync(ExternalAuthenticationContext ctx)
         {
             var externalUser = ctx.ExternalIdentity;
             var message = ctx.SignInMessage;
@@ -187,16 +192,16 @@ namespace IdentityServer3.MembershipReboot
                 var acct = this.userAccountService.GetByLinkedAccount(tenant, externalUser.Provider, externalUser.ProviderId);
                 if (acct == null)
                 {
-                    return await ProcessNewExternalAccountAsync(tenant, externalUser.Provider, externalUser.ProviderId, externalUser.Claims);
+                    ctx.AuthenticateResult = await ProcessNewExternalAccountAsync(tenant, externalUser.Provider, externalUser.ProviderId, externalUser.Claims);
                 }
                 else
                 {
-                    return await ProcessExistingExternalAccountAsync(acct.ID, externalUser.Provider, externalUser.ProviderId, externalUser.Claims);
+                    ctx.AuthenticateResult = await ProcessExistingExternalAccountAsync(acct.ID, externalUser.Provider, externalUser.ProviderId, externalUser.Claims);
                 }
             }
             catch (ValidationException ex)
             {
-                return new AuthenticateResult(ex.Message);
+                ctx.AuthenticateResult = new AuthenticateResult(ex.Message);
             }
         }
 
@@ -332,17 +337,15 @@ namespace IdentityServer3.MembershipReboot
             }
         }
 
-        public override Task<bool> IsActiveAsync(IsActiveContext ctx)
+        public override Task IsActiveAsync(IsActiveContext ctx)
         {
             var subject = ctx.Subject;
 
             var acct = userAccountService.GetByID(subject.GetSubjectId().ToGuid());
-            if (acct == null)
-            {
-                return Task.FromResult(false);
-            }
+            
+            ctx.IsActive = acct != null && !acct.IsAccountClosed && acct.IsLoginAllowed;
 
-            return Task.FromResult(!acct.IsAccountClosed && acct.IsLoginAllowed);
+            return Task.FromResult(0);
         }
     }
     

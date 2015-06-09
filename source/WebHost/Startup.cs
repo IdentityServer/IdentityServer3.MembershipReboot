@@ -17,17 +17,26 @@ using Microsoft.Owin.Security.Twitter;
  * limitations under the License.
  */
 using Owin;
-using SelfHost.IdSvr;
+using WebHost.IdSvr;
 using IdentityManager.Configuration;
 using IdentityServer3.Core.Configuration;
-using SelfHost.IdMgr;
+using WebHost.IdMgr;
+using Serilog;
+using IdentityManager.Core.Logging;
+using IdentityManager.Logging;
 
-namespace SelfHost
+namespace WebHost
 {
     internal class Startup
     {
         public void Configuration(IAppBuilder app)
         {
+            LogProvider.SetCurrentLogProvider(new DiagnosticsTraceLogProvider());
+            Log.Logger = new LoggerConfiguration()
+               .MinimumLevel.Debug()
+               .WriteTo.Trace()
+               .CreateLogger();
+
             var connectionString = "MembershipReboot";
 
             app.Map("/admin", adminApp =>
@@ -41,22 +50,24 @@ namespace SelfHost
                 });
             });
 
-
-            var idSvrFactory = Factory.Configure();
-            idSvrFactory.ConfigureCustomUserService(connectionString);
-
-            var options = new IdentityServerOptions
+            app.Map("/core", core =>
             {
-                SiteName = "IdentityServer3 - UserService-MembershipReboot",
-                
-                SigningCertificate = Certificate.Get(),
-                Factory = idSvrFactory,
-                AuthenticationOptions = new AuthenticationOptions{
-                    IdentityProviders = ConfigureAdditionalIdentityProviders,
-                }
-            };
+                var idSvrFactory = Factory.Configure();
+                idSvrFactory.ConfigureCustomUserService(connectionString);
 
-            app.UseIdentityServer(options);
+                var options = new IdentityServerOptions
+                {
+                    SiteName = "IdentityServer3 - UserService-MembershipReboot",
+                
+                    SigningCertificate = Certificate.Get(),
+                    Factory = idSvrFactory,
+                    AuthenticationOptions = new AuthenticationOptions{
+                        IdentityProviders = ConfigureAdditionalIdentityProviders,
+                    }
+                };
+
+                core.UseIdentityServer(options);
+            });
         }
 
         public static void ConfigureAdditionalIdentityProviders(IAppBuilder app, string signInAsType)

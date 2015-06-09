@@ -24,29 +24,12 @@ using System.Web;
 using IdentityManager;
 using IdentityManager.MembershipReboot;
 
-namespace SelfHost.MR
+namespace WebHost.MR
 {
-    public class CustomUser : RelationalUserAccount
+    public class CustomDatabase : MembershipRebootDbContext<CustomUser, CustomGroup>
     {
-        [Display(Name="First Name")]
-        public virtual string FirstName { get; set; }
-        [Display(Name = "Last Name")]
-        public virtual string LastName { get; set; }
-        public virtual int? Age { get; set; }
-    }
-
-    public class CustomUserAccountService : UserAccountService<CustomUser>
-    {
-        public CustomUserAccountService(CustomConfig config, CustomUserRepository repo)
-            : base(config, repo)
-        {
-        }
-    }
-
-    public class CustomUserRepository : DbContextUserAccountRepository<CustomDatabase, CustomUser>
-    {
-        public CustomUserRepository(CustomDatabase ctx)
-            : base(ctx)
+        public CustomDatabase(string name)
+            :base(name)
         {
         }
     }

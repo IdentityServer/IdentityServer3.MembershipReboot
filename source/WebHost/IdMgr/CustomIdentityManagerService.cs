@@ -1,4 +1,5 @@
-﻿/*
+﻿using WebHost.MR;
+/*
  * Copyright 2014 Dominick Baier, Brock Allen
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,39 +14,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-using BrockAllen.MembershipReboot;
-using BrockAllen.MembershipReboot.Ef;
-using BrockAllen.MembershipReboot.Relational;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Web;
-using IdentityManager;
 using IdentityManager.MembershipReboot;
 
-namespace SelfHost.MR
+namespace WebHost.IdMgr
 {
-    public class CustomGroup : RelationalGroup
+    public class CustomIdentityManagerService : MembershipRebootIdentityManagerService<CustomUser, CustomGroup>
     {
-        public virtual string Description { get; set; }
-    }
-
-    public class CustomGroupService : GroupService<CustomGroup>
-    {
-        public CustomGroupService(CustomGroupRepository repo, CustomConfig config)
-            : base(config.DefaultTenant, repo)
-        {
-
-        }
-    }
-
-    public class CustomGroupRepository : DbContextGroupRepository<CustomDatabase, CustomGroup>
-    {
-        public CustomGroupRepository(CustomDatabase ctx)
-            : base(ctx)
+        public CustomIdentityManagerService(CustomUserAccountService userSvc, CustomGroupService groupSvc)
+            : base(userSvc, groupSvc)
         {
         }
     }
-
 }

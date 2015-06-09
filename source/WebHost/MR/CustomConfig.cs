@@ -13,25 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-using Microsoft.Owin.Hosting;
+using BrockAllen.MembershipReboot;
 using System;
-using IdentityServer3.Core.Logging;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
 
-namespace SelfHost
+namespace WebHost.MR
 {
-    internal class Program
+    public class CustomConfig : MembershipRebootConfiguration<CustomUser>
     {
-        private static void Main(string[] args)
+        public static readonly CustomConfig Config;
+        
+        static CustomConfig()
         {
-            Console.Title = "IdentityServer3 SelfHost";
-            LogProvider.SetCurrentLogProvider(new DiagnosticsTraceLogProvider());
-
-            const string url = "https://localhost:44333/core";
-            using (WebApp.Start<Startup>(url))
-            {
-                Console.WriteLine("\n\nServer listening at {0}. Press enter to stop", url);
-                Console.ReadLine();
-            }
+            Config = new CustomConfig();
+            Config.PasswordHashingIterationCount = 10000;
+            Config.RequireAccountVerification = false;
+            //config.EmailIsUsername = true;
         }
     }
 }

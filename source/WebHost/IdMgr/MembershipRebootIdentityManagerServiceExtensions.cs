@@ -16,7 +16,7 @@
 using BrockAllen.MembershipReboot;
 using BrockAllen.MembershipReboot.Ef;
 using BrockAllen.MembershipReboot.Relational;
-using SelfHost.MR;
+using WebHost.MR;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -27,7 +27,7 @@ using IdentityManager;
 using IdentityManager.Configuration;
 using IdentityManager.MembershipReboot;
 
-namespace SelfHost.IdMgr
+namespace WebHost.IdMgr
 {
     public static class MembershipRebootIdentityManagerServiceExtensions
     {

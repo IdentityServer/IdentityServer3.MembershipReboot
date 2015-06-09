@@ -24,7 +24,7 @@ using IdentityServer3.Core.Services;
 using IdentityServer3.Core.Services.InMemory;
 using IdentityServer3.Core.Services.Default;
 
-namespace SelfHost.IdSvr
+namespace WebHost.IdSvr
 {
     class Factory
     {

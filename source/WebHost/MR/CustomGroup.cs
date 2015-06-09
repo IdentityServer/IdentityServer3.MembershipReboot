@@ -24,13 +24,28 @@ using System.Web;
 using IdentityManager;
 using IdentityManager.MembershipReboot;
 
-namespace SelfHost.MR
+namespace WebHost.MR
 {
-    public class CustomDatabase : MembershipRebootDbContext<CustomUser, CustomGroup>
+    public class CustomGroup : RelationalGroup
     {
-        public CustomDatabase(string name)
-            :base(name)
+        public virtual string Description { get; set; }
+    }
+
+    public class CustomGroupService : GroupService<CustomGroup>
+    {
+        public CustomGroupService(CustomGroupRepository repo, CustomConfig config)
+            : base(config.DefaultTenant, repo)
+        {
+
+        }
+    }
+
+    public class CustomGroupRepository : DbContextGroupRepository<CustomDatabase, CustomGroup>
+    {
+        public CustomGroupRepository(CustomDatabase ctx)
+            : base(ctx)
         {
         }
     }
+
 }

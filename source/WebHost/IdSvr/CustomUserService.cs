@@ -1,4 +1,4 @@
-﻿using SelfHost.MR;
+﻿using WebHost.MR;
 /*
  * Copyright 2014 Dominick Baier, Brock Allen
  *
@@ -23,7 +23,7 @@ using IdentityServer3.Core.Configuration;
 using IdentityServer3.Core.Services;
 using IdentityServer3.MembershipReboot;
 
-namespace SelfHost.IdSvr
+namespace WebHost.IdSvr
 {
     public static class CustomUserServiceExtensions
     {
