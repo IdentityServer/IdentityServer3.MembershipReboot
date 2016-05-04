@@ -343,7 +343,7 @@ namespace IdentityServer3.MembershipReboot
 
             var acct = userAccountService.GetByID(subject.GetSubjectId().ToGuid());
             
-            ctx.IsActive = acct != null && !acct.IsAccountClosed && acct.IsLoginAllowed;
+            ctx.IsActive = acct != null && !acct.IsAccountClosed && acct.IsLoginAllowed && acct.IsAccountVerified;
 
             return Task.FromResult(0);
         }
